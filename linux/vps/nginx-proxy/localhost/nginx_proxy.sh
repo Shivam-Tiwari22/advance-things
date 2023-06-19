@@ -1,5 +1,46 @@
 #!/bin/bash
 
+# Function to install Nginx
+function install_nginx() {
+    echo "Installing Nginx..."
+    
+    if [ -x "$(command -v apt)" ]; then
+        # Debian, Ubuntu, and related distributions
+        apt update
+        apt install nginx -y
+    elif [ -x "$(command -v yum)" ]; then
+        # CentOS, RHEL, and related distributions
+        yum install nginx -y
+    elif [ -x "$(command -v dnf)" ]; then
+        # Fedora
+        dnf install nginx -y
+    else
+        echo "Unsupported distribution. Please install Nginx manually."
+        exit 1
+    fi
+    
+    echo "Nginx installed successfully!"
+}
+
+# Function to start Nginx service
+function start_nginx() {
+    echo "Starting Nginx..."
+    
+    if [ -x "$(command -v systemctl)" ]; then
+        # Systemd-based distributions
+        systemctl start nginx
+        systemctl enable nginx
+    elif [ -x "$(command -v service)" ]; then
+        # SysV init-based distributions
+        service nginx start
+        chkconfig nginx on
+    else
+        echo "Unable to start Nginx service. Please start it manually."
+    fi
+    
+    echo "Nginx started and enabled!"
+}
+
 # Function to add a new subdomain
 function add_subdomain() {
     echo "Adding a new subdomain..."
@@ -87,10 +128,16 @@ function remove_subdomain() {
 
 # Ask the user what they want to do
 echo "What do you want to do?"
-options=("Add subdomain" "Update subdomain" "Remove subdomain" "Quit")
+options=("Install Nginx" "Start Nginx" "Add subdomain" "Update subdomain" "Remove subdomain" "Quit")
 select opt in "${options[@]}"
 do
     case $opt in
+        "Install Nginx")
+            install_nginx
+            ;;
+        "Start Nginx")
+            start_nginx
+            ;;
         "Add subdomain")
             add_subdomain
             ;;
